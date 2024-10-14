@@ -28,12 +28,13 @@ namespace to_do_list
 
                 if (reader != null && reader.Read())
                 {
+                    string idTarefa = reader["id"].ToString();
                     string nomeTarefa = reader["nome"].ToString();
-                    criarPanel(nomeTarefa);
+                    criarPanel(Convert.ToInt32(idTarefa), nomeTarefa);
                 }
             }
         }
-        public void criarPanel(string nome)
+        public void criarPanel(int idTarefa, string nomeTarefa)
         {
             CadastrarTarefa cadTarefas = new CadastrarTarefa();
             Panel painel = new Panel()
@@ -43,7 +44,7 @@ namespace to_do_list
             };
             Label label = new Label()
             {
-                Text = nome,
+                Text = nomeTarefa,
                 Font = new Font("Segoe UI", 15, FontStyle.Bold),
                 Location = new Point(10, 10) //location dentro do painel
             };
@@ -51,23 +52,46 @@ namespace to_do_list
             {
                 Location = new Point(800, 10),
                 Text = "Remover painel",
-                Name = txtNomeTarefa.Text,
+                Tag = idTarefa
             };
             Button btnConcluir = new Button()
             {
                 Location = new Point(500, 10),
                 Text = "Concluir tarefa",
-                Name = txtNomeTarefa.Text
+                Tag = idTarefa
+            };
+            Button btnAtualizar = new Button()
+            {
+                Location = new Point(300, 10),
+                Text = "Atualizar tarefa",
+                Tag = idTarefa
+            };
+            TextBox txtBoxNome = new TextBox()
+            {
+                Location = new Point(150, 10),
+                Text = "Tarrefa",
+                Tag = idTarefa
+
             };
 
             btnExcluir.Click += (s, args) => flowLayoutPanel2.Controls.Remove(painel);
             btnExcluir.Click += BtnExcluir_Click;
 
             btnConcluir.Click += BtnConcluir_Click;
+            if(cadTarefas.Completa == 0)
+            {
+                btnConcluir.BackColor = Color.Red;
+            }
+            else
+            {
+                btnConcluir.BackColor = Color.Blue;
+            }
 
             painel.Controls.Add(label);
             painel.Controls.Add(btnExcluir);
             painel.Controls.Add(btnConcluir);
+            painel.Controls.Add(btnAtualizar);
+            painel.Controls.Add(txtBoxNome);
 
             flowLayoutPanel2.Controls.Add(painel);
 
@@ -75,7 +99,7 @@ namespace to_do_list
             {
                 try
                 {
-                    cadTarefas.Nome = btnExcluir.Name;
+                    cadTarefas.Id = Convert.ToInt32(btnExcluir.Tag);
                     if (cadTarefas.deletarTarefa())
                     {
                         MessageBox.Show("Deletado com sucesso!");
@@ -89,21 +113,24 @@ namespace to_do_list
 
             void BtnConcluir_Click(object sender, EventArgs e)
             {
-                cadTarefas.Nome = btnConcluir.Name;
-                if (cadTarefas.atualizarTarefa())
+                try
                 {
-                    if(cadTarefas.Completa == 0)
+                    cadTarefas.Id = Convert.ToInt32(btnConcluir.Tag);
+                    if (cadTarefas.atualizarTarefa())
                     {
-                        cadTarefas.Completa += 1;
-                        btnConcluir.BackColor = Color.Red;
-                        cadTarefas.atualizarTarefa();
+                       if(cadTarefas.verificarCompleta == true)
+                        {
+                            btnConcluir.BackColor = Color.Red;
+                        }
+                        else
+                        {
+                            btnConcluir.BackColor = Color.Blue;
+                        }
                     }
-                    else
-                    {
-                        cadTarefas.Completa -= 1;
-                        btnConcluir.BackColor = Color.AliceBlue;
-                        cadTarefas.atualizarTarefa();
-                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Concluída com sucesso!" + ex.Message);
                 }
             }
         }
@@ -114,12 +141,13 @@ namespace to_do_list
                 if (!txtNomeTarefa.Text.Equals(""))
                 {
                     CadastrarTarefa cadTarefa = new CadastrarTarefa();
-                    cadTarefa.Completa = 0;
                     cadTarefa.Nome = txtNomeTarefa.Text;
-                    criarPanel(txtNomeTarefa.Text);
-                    if (cadTarefa.cadastrarTarefa())
+                    int tarefaId = cadTarefa.cadastrarTarefa();
+                    criarPanel(tarefaId, txtNomeTarefa.Text);
+                    if (tarefaId > 0)
                     {
                         MessageBox.Show($"Tarefa adicionada com sucesso!");
+                        label1.Text = Convert.ToString(tarefaId);
                         txtNomeTarefa.Clear();
                     }
                     else

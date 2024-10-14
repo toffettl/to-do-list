@@ -2,6 +2,7 @@
 using Mysqlx.Crud;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ namespace to_do_list
         private int id;
         private string nome;
         private int completa;
+        public bool verificarCompleta;
 
         public int Id
         {
@@ -32,29 +34,29 @@ namespace to_do_list
         }
 
         //cadastrar funcionario no banco
-        public bool cadastrarTarefa()
+        public int cadastrarTarefa()
         {
-            try
+            int idTarefa = 0;
+
+            using (MySqlConnection MysqlConexaoBanco = new MySqlConnection(ConexaoBanco.bancoServidor))
             {
-                MySqlConnection MysqlConexaoBanco = new MySqlConnection(ConexaoBanco.bancoServidor);
                 MysqlConexaoBanco.Open();
 
-                string insert = $" insert into tarefas (id, nome, completa) values ('{Id}','{Nome}', '{Completa}')";
+                string insert = "INSERT INTO tarefas (nome, completa) VALUES (@Nome, @Completa); SELECT LAST_INSERT_ID();";
 
-                MySqlCommand comandoSql = MysqlConexaoBanco.CreateCommand();
-                comandoSql.CommandText = insert;
+                using (MySqlCommand comandoSql = new MySqlCommand(insert, MysqlConexaoBanco))
+                {
+                    comandoSql.Parameters.AddWithValue("@Nome", Nome);
+                    comandoSql.Parameters.AddWithValue("@Completa", Completa = 1);
 
-                comandoSql.ExecuteNonQuery();
-                return true;
+                    idTarefa = Convert.ToInt32(comandoSql.ExecuteScalar());
+                }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Erro no banco de dados - método cadastrarTarefa" + ex.Message);
-                return false;
-            }
+
+            return idTarefa;
         }
 
-        public MySqlDataReader localizarTarefa(int numeroTarefas)
+            public MySqlDataReader localizarTarefa(int numeroTarefas)
         {
             try
             {
@@ -82,11 +84,19 @@ namespace to_do_list
             {
                 MySqlConnection MysqlConexaoBanco = new MySqlConnection(ConexaoBanco.bancoServidor);
                 MysqlConexaoBanco.Open();
-
-                string update = $"update tarefas set nome = '{Nome}', completa = '{Completa}' where nome = '{Nome}';";
+                string update = $"update tarefas set completa = '{Completa}' where id = '{Id}';";
+                if (Completa == 1)
+                {
+                    Completa -= 1;
+                    verificarCompleta = true;
+                }
+                else
+                {
+                    Completa += 1;
+                    verificarCompleta = false;
+                }
                 MySqlCommand comandoSql = MysqlConexaoBanco.CreateCommand();
                 comandoSql.CommandText = update;
-
                 comandoSql.ExecuteNonQuery();
                 return true;
             }
@@ -104,7 +114,7 @@ namespace to_do_list
                 MySqlConnection MysqlConexaoBanco = new MySqlConnection(ConexaoBanco.bancoServidor);
                 MysqlConexaoBanco.Open();
 
-                string delete = $"delete from tarefas where nome = '{Nome}';";
+                string delete = $"delete from tarefas where id = '{Id}';";
                 MySqlCommand comandoSql = MysqlConexaoBanco.CreateCommand();
                 comandoSql.CommandText = delete;
 
