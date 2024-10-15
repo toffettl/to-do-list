@@ -19,6 +19,10 @@ namespace to_do_list
         }
         private void Form1_Load(object sender, EventArgs e)
         {
+            carregarLista();
+        }
+        private void carregarLista()
+        {
             CadastrarTarefa cadastrarTarefa = new CadastrarTarefa();
             int totalTarefas = cadastrarTarefa.contarTarefas();
 
@@ -30,11 +34,21 @@ namespace to_do_list
                 {
                     string idTarefa = reader["id"].ToString();
                     string nomeTarefa = reader["nome"].ToString();
-                    criarPanel(Convert.ToInt32(idTarefa), nomeTarefa);
+                    int statusTarefa = Convert.ToInt32(reader["completa"]);
+                    Color corStatus;
+                    if (statusTarefa == 1)
+                    {
+                        corStatus = Color.Red;
+                    }
+                    else
+                    {
+                        corStatus = Color.Blue;
+                    }
+                    criarPanel(Convert.ToInt32(idTarefa), nomeTarefa, Convert.ToInt32(statusTarefa), corStatus);
                 }
             }
         }
-        public void criarPanel(int idTarefa, string nomeTarefa)
+        public void criarPanel(int idTarefa, string nomeTarefa, int statusTarefa, Color corStatus)
         {
             CadastrarTarefa cadTarefas = new CadastrarTarefa();
             Panel painel = new Panel()
@@ -58,7 +72,8 @@ namespace to_do_list
             {
                 Location = new Point(500, 10),
                 Text = "Concluir tarefa",
-                Tag = idTarefa
+                Tag = idTarefa,
+                BackColor = corStatus
             };
             Button btnAtualizar = new Button()
             {
@@ -80,12 +95,14 @@ namespace to_do_list
             btnConcluir.Click += BtnConcluir_Click;
             if(cadTarefas.Completa == 0)
             {
-                btnConcluir.BackColor = Color.Red;
+                corStatus = Color.Red;
             }
             else
             {
-                btnConcluir.BackColor = Color.Blue;
+                corStatus = Color.Blue;
             }
+
+            btnAtualizar.Click += btnAtualizar_Click;
 
             painel.Controls.Add(label);
             painel.Controls.Add(btnExcluir);
@@ -116,6 +133,7 @@ namespace to_do_list
                 try
                 {
                     cadTarefas.Id = Convert.ToInt32(btnConcluir.Tag);
+                    cadTarefas.Nome = txtBoxNome.Text;
                     if (cadTarefas.atualizarTarefa())
                     {
                        if(cadTarefas.verificarCompleta == true)
@@ -133,6 +151,17 @@ namespace to_do_list
                     MessageBox.Show("Concluída com sucesso!" + ex.Message);
                 }
             }
+
+            void btnAtualizar_Click(object sender, EventArgs e)
+            {
+                cadTarefas.Id = Convert.ToInt32(btnAtualizar.Tag);
+                cadTarefas.Nome = txtBoxNome.Text;
+                txtBoxNome.Text = cadTarefas.Nome;
+                if (cadTarefas.atualizarTarefa())
+                {
+                    MessageBox.Show("Nome atualizado com sucesso!");
+                }
+            }
         }
         private void btnAdicionarTarefa_Click(object sender, EventArgs e)
         {
@@ -141,9 +170,11 @@ namespace to_do_list
                 if (!txtNomeTarefa.Text.Equals(""))
                 {
                     CadastrarTarefa cadTarefa = new CadastrarTarefa();
+                    int statusTarefa = 0;
+                    Color corStatus = Color.Red;
                     cadTarefa.Nome = txtNomeTarefa.Text;
                     int tarefaId = cadTarefa.cadastrarTarefa();
-                    criarPanel(tarefaId, txtNomeTarefa.Text);
+                    criarPanel(tarefaId, txtNomeTarefa.Text, statusTarefa, corStatus);
                     if (tarefaId > 0)
                     {
                         MessageBox.Show($"Tarefa adicionada com sucesso!");

@@ -63,7 +63,7 @@ namespace to_do_list
                 MySqlConnection MysqlConexaoBanco = new MySqlConnection(ConexaoBanco.bancoServidor);
                 MysqlConexaoBanco.Open();
 
-                string select = $"select id, nome from tarefas where id = '{numeroTarefas}';";
+                string select = $"select id, nome , completa from tarefas where id = '{numeroTarefas}';";
 
                 MySqlCommand comandoSql = MysqlConexaoBanco.CreateCommand();
                 comandoSql.CommandText = select;
@@ -84,16 +84,16 @@ namespace to_do_list
             {
                 MySqlConnection MysqlConexaoBanco = new MySqlConnection(ConexaoBanco.bancoServidor);
                 MysqlConexaoBanco.Open();
-                string update = $"update tarefas set completa = '{Completa}' where id = '{Id}';";
+                string update = $"update tarefas set nome = '{Nome}', completa = '{Completa}' where id = '{Id}';";
                 if (Completa == 1)
                 {
-                    Completa -= 1;
                     verificarCompleta = true;
+                    Completa -= 1;
                 }
                 else
                 {
-                    Completa += 1;
                     verificarCompleta = false;
+                    Completa += 1;
                 }
                 MySqlCommand comandoSql = MysqlConexaoBanco.CreateCommand();
                 comandoSql.CommandText = update;
