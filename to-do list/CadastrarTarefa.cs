@@ -84,7 +84,10 @@ namespace to_do_list
             {
                 MySqlConnection MysqlConexaoBanco = new MySqlConnection(ConexaoBanco.bancoServidor);
                 MysqlConexaoBanco.Open();
-                string update = $"update tarefas set nome = '{Nome}', completa = '{Completa}' where id = '{Id}';";
+                string update = $"update tarefas set completa = '{Completa}' where id = '{Id}';";
+                MySqlCommand comandoSql = MysqlConexaoBanco.CreateCommand();
+                comandoSql.CommandText = update;
+                comandoSql.ExecuteNonQuery();
                 if (Completa == 1)
                 {
                     verificarCompleta = true;
@@ -95,9 +98,6 @@ namespace to_do_list
                     verificarCompleta = false;
                     Completa += 1;
                 }
-                MySqlCommand comandoSql = MysqlConexaoBanco.CreateCommand();
-                comandoSql.CommandText = update;
-                comandoSql.ExecuteNonQuery();
                 return true;
             }
             catch (Exception ex)
@@ -106,6 +106,25 @@ namespace to_do_list
                 return false;
             }
         }
+        public bool atualizarNome()
+        {
+            try
+            {
+                MySqlConnection MysqlConexaoBanco = new MySqlConnection(ConexaoBanco.bancoServidor);
+                MysqlConexaoBanco.Open();
+                string updateNome = $"update tarefas set nome = '{Nome}' where id = '{Id}';";
+                MySqlCommand comandoSql = MysqlConexaoBanco.CreateCommand();
+                comandoSql.CommandText = updateNome;
+                comandoSql.ExecuteNonQuery();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro no banco de dados - método atualizarNome " + ex.Message);
+                return false;
+            }
+        }
+
 
         public bool deletarTarefa()
         {

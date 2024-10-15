@@ -20,6 +20,9 @@ namespace to_do_list
         private void Form1_Load(object sender, EventArgs e)
         {
             carregarLista();
+            timer1 = new Timer();
+            timer1.Interval = 500; // 500 milissegundos
+            timer1.Tick += timer1_Tick;
         }
         private void carregarLista()
         {
@@ -36,31 +39,28 @@ namespace to_do_list
                     string nomeTarefa = reader["nome"].ToString();
                     int statusTarefa = Convert.ToInt32(reader["completa"]);
                     Color corStatus;
-                    if (statusTarefa == 1)
+                    Color corStatusTxt;
+                    if (statusTarefa == 0)
                     {
-                        corStatus = Color.Red;
+                        corStatus = ColorTranslator.FromHtml("#D2EBD3");
+                        corStatusTxt = ColorTranslator.FromHtml("#74C178");
                     }
                     else
                     {
-                        corStatus = Color.Blue;
+                        corStatus = ColorTranslator.FromHtml("#F5D0CD");
+                        corStatusTxt = ColorTranslator.FromHtml("#d63a2f");
                     }
-                    criarPanel(Convert.ToInt32(idTarefa), nomeTarefa, Convert.ToInt32(statusTarefa), corStatus);
+                    criarPanel(Convert.ToInt32(idTarefa), nomeTarefa, Convert.ToInt32(statusTarefa), corStatus, corStatusTxt);
                 }
             }
         }
-        public void criarPanel(int idTarefa, string nomeTarefa, int statusTarefa, Color corStatus)
+        public void criarPanel(int idTarefa, string nomeTarefa, int statusTarefa, Color corStatus, Color corStatusTxt)
         {
             CadastrarTarefa cadTarefas = new CadastrarTarefa();
             Panel painel = new Panel()
             {
-                BackColor = Color.FromArgb(164, 172, 134),
+                BackColor = Color.White,
                 Size = new Size(990, 50)
-            };
-            Label label = new Label()
-            {
-                Text = nomeTarefa,
-                Font = new Font("Segoe UI", 15, FontStyle.Bold),
-                Location = new Point(10, 10) //location dentro do painel
             };
             Button btnExcluir = new Button()
             {
@@ -73,20 +73,23 @@ namespace to_do_list
                 Location = new Point(500, 10),
                 Text = "Concluir tarefa",
                 Tag = idTarefa,
-                BackColor = corStatus
-            };
-            Button btnAtualizar = new Button()
-            {
-                Location = new Point(300, 10),
-                Text = "Atualizar tarefa",
-                Tag = idTarefa
+                BackColor = corStatus,
+                ForeColor = corStatusTxt,
+                Font = new Font("Arial", 8, FontStyle.Bold)
             };
             TextBox txtBoxNome = new TextBox()
             {
-                Location = new Point(150, 10),
-                Text = "Tarrefa",
-                Tag = idTarefa
-
+                Location = new Point(10, 10),
+                Text = nomeTarefa,
+                ForeColor = ColorTranslator.FromHtml("#454950"),
+                BackColor = ColorTranslator.FromHtml("#F7F7F7"),
+                Font = new Font("Sergoe UI", 12),
+                Tag = idTarefa,
+                BorderStyle = BorderStyle.None
+            };
+            DateTimePicker boxHoras = new DateTimePicker();
+            {
+                Location = new Point(50, 10);
             };
 
             btnExcluir.Click += (s, args) => flowLayoutPanel2.Controls.Remove(painel);
@@ -102,13 +105,12 @@ namespace to_do_list
                 corStatus = Color.Blue;
             }
 
-            btnAtualizar.Click += btnAtualizar_Click;
+            txtBoxNome.TextChanged += btnAtualizar_Click;
 
-            painel.Controls.Add(label);
             painel.Controls.Add(btnExcluir);
             painel.Controls.Add(btnConcluir);
-            painel.Controls.Add(btnAtualizar);
             painel.Controls.Add(txtBoxNome);
+            painel.Controls.Add(boxHoras);
 
             flowLayoutPanel2.Controls.Add(painel);
 
@@ -138,11 +140,13 @@ namespace to_do_list
                     {
                        if(cadTarefas.verificarCompleta == true)
                         {
-                            btnConcluir.BackColor = Color.Red;
+                            btnConcluir.BackColor = ColorTranslator.FromHtml("#F5D0CD");
+                            btnConcluir.ForeColor = ColorTranslator.FromHtml("#d63a2f");
                         }
                         else
                         {
-                            btnConcluir.BackColor = Color.Blue;
+                            btnConcluir.BackColor = ColorTranslator.FromHtml("#D2EBD3");
+                            btnConcluir.ForeColor = ColorTranslator.FromHtml("#74C178");
                         }
                     }
                 }
@@ -154,12 +158,14 @@ namespace to_do_list
 
             void btnAtualizar_Click(object sender, EventArgs e)
             {
-                cadTarefas.Id = Convert.ToInt32(btnAtualizar.Tag);
+                cadTarefas.Id = Convert.ToInt32(txtBoxNome.Tag);
                 cadTarefas.Nome = txtBoxNome.Text;
                 txtBoxNome.Text = cadTarefas.Nome;
-                if (cadTarefas.atualizarTarefa())
+
+                if (cadTarefas.atualizarNome())
                 {
-                    MessageBox.Show("Nome atualizado com sucesso!");
+                    pictureBox1.Visible = true;
+                    timer1.Start();
                 }
             }
         }
@@ -167,35 +173,34 @@ namespace to_do_list
         {
             try
             {
-                if (!txtNomeTarefa.Text.Equals(""))
-                {
                     CadastrarTarefa cadTarefa = new CadastrarTarefa();
                     int statusTarefa = 0;
-                    Color corStatus = Color.Red;
-                    cadTarefa.Nome = txtNomeTarefa.Text;
+                    Color corStatus = ColorTranslator.FromHtml("#F5D0CD");
+                    Color corStatusTxt = ColorTranslator.FromHtml("#d63a2f");
                     int tarefaId = cadTarefa.cadastrarTarefa();
-                    criarPanel(tarefaId, txtNomeTarefa.Text, statusTarefa, corStatus);
+                    criarPanel(tarefaId, cadTarefa.Nome, statusTarefa, corStatus, corStatusTxt);
                     if (tarefaId > 0)
                     {
+                        
                         MessageBox.Show($"Tarefa adicionada com sucesso!");
-                        label1.Text = Convert.ToString(tarefaId);
-                        txtNomeTarefa.Clear();
                     }
                     else
                     {
                         MessageBox.Show("Não foi possivel cadastrar");
                     }
-                }
-                else
-                {
-                    MessageBox.Show("Favor preencher todos os campos corretamente!");
-                    txtNomeTarefa.Clear();
-                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Erro ao cadastar tarefa: " + ex.Message);
             }
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            pictureBox1.Visible = false;
+
+            // Para o Timer
+            timer1.Stop();
         }
     }
 }
