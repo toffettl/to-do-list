@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -64,18 +65,23 @@ namespace to_do_list
             };
             Button btnExcluir = new Button()
             {
-                Location = new Point(800, 10),
+                Location = new Point(900, 10),
                 Text = "Remover painel",
-                Tag = idTarefa
+                Tag = idTarefa,
+                BackColor = ColorTranslator.FromHtml("#6F5CC3"),
+                ForeColor = Color.White,
+                Font = new Font("Arial", 8, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat
             };
             Button btnConcluir = new Button()
             {
-                Location = new Point(500, 10),
+                Location = new Point(725, 10),
                 Text = "Concluir tarefa",
                 Tag = idTarefa,
                 BackColor = corStatus,
                 ForeColor = corStatusTxt,
-                Font = new Font("Arial", 8, FontStyle.Bold)
+                Font = new Font("Arial", 8, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat
             };
             TextBox txtBoxNome = new TextBox()
             {
@@ -87,16 +93,25 @@ namespace to_do_list
                 Tag = idTarefa,
                 BorderStyle = BorderStyle.None
             };
-            DateTimePicker boxHoras = new DateTimePicker();
+            DateTimePicker boxHoras = new DateTimePicker()
             {
-                Location = new Point(50, 10);
+                Location = new Point(570, 10),
+                Format = DateTimePickerFormat.Time,
+                CustomFormat = "HH:mm",
+                ShowUpDown = true,
+                Size = new Size(55, 10),
+                Font = new Font("Arial", 10, FontStyle.Bold),
+                Tag = idTarefa
             };
 
             btnExcluir.Click += (s, args) => flowLayoutPanel2.Controls.Remove(painel);
             btnExcluir.Click += BtnExcluir_Click;
 
             btnConcluir.Click += BtnConcluir_Click;
-            if(cadTarefas.Completa == 0)
+
+            boxHoras.ValueChanged += atualizarHora;
+
+            if (cadTarefas.Completa == 0)
             {
                 corStatus = Color.Red;
             }
@@ -168,26 +183,37 @@ namespace to_do_list
                     timer1.Start();
                 }
             }
+
+            void atualizarHora(object sender, EventArgs e)
+            {
+                cadTarefas.Id = Convert.ToInt32(boxHoras.Tag);
+                DateTime dataTarefa = boxHoras.Value;
+                TimeSpan hora = dataTarefa.TimeOfDay;
+                cadTarefas.Hora = hora;
+                if (cadTarefas.atualizarHora())
+                {
+                    MessageBox.Show("das");
+                }
+            }
         }
         private void btnAdicionarTarefa_Click(object sender, EventArgs e)
         {
             try
             {
-                    CadastrarTarefa cadTarefa = new CadastrarTarefa();
-                    int statusTarefa = 0;
-                    Color corStatus = ColorTranslator.FromHtml("#F5D0CD");
-                    Color corStatusTxt = ColorTranslator.FromHtml("#d63a2f");
-                    int tarefaId = cadTarefa.cadastrarTarefa();
-                    criarPanel(tarefaId, cadTarefa.Nome, statusTarefa, corStatus, corStatusTxt);
-                    if (tarefaId > 0)
-                    {
-                        
-                        MessageBox.Show($"Tarefa adicionada com sucesso!");
-                    }
-                    else
-                    {
-                        MessageBox.Show("Não foi possivel cadastrar");
-                    }
+                CadastrarTarefa cadTarefa = new CadastrarTarefa();
+                int statusTarefa = 0;
+                Color corStatus = ColorTranslator.FromHtml("#F5D0CD");
+                Color corStatusTxt = ColorTranslator.FromHtml("#d63a2f");
+                int tarefaId = cadTarefa.cadastrarTarefa();
+                criarPanel(tarefaId, cadTarefa.Nome, statusTarefa, corStatus, corStatusTxt);
+                if (tarefaId > 0)
+                {
+                    MessageBox.Show($"Tarefa adicionada com sucesso!");
+                }
+                else
+                {
+                    MessageBox.Show("Não foi possivel cadastrar");
+                }
             }
             catch (Exception ex)
             {
@@ -201,6 +227,24 @@ namespace to_do_list
 
             // Para o Timer
             timer1.Stop();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            DialogResult resultado = MessageBox.Show("Deseja sair?", "Sair", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (resultado == DialogResult.Yes)
+            {
+                Close();
+            }
+        }
+
+        private void pictureBox2_Click(object sender, EventArgs e)
+        {
+            string linkGithub = "https://github.com/toffettl";
+
+            // Abre a URL no navegador padrão
+            Process.Start(new ProcessStartInfo(linkGithub) { UseShellExecute = true });
         }
     }
 }

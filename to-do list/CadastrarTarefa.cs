@@ -1,6 +1,8 @@
 ﻿using MySql.Data.MySqlClient;
 using Mysqlx.Crud;
+using Org.BouncyCastle.Asn1.X509;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -15,6 +17,7 @@ namespace to_do_list
         private int id;
         private string nome;
         private int completa;
+        private TimeSpan hora;
         public bool verificarCompleta;
 
         public int Id
@@ -32,7 +35,11 @@ namespace to_do_list
             get { return completa; }
             set { completa = value; }
         }
-
+        public TimeSpan Hora
+        {
+            get { return hora; }
+            set { hora = value; }
+        }
         //cadastrar funcionario no banco
         public int cadastrarTarefa()
         {
@@ -121,6 +128,37 @@ namespace to_do_list
             catch (Exception ex)
             {
                 MessageBox.Show("Erro no banco de dados - método atualizarNome " + ex.Message);
+                return false;
+            }
+        }
+
+        public bool atualizarHora()
+        {
+            try
+            {
+                MySqlConnection MysqlConexaoBanco = new MySqlConnection(ConexaoBanco.bancoServidor);
+                MysqlConexaoBanco.Open();
+                string updateHora = "UPDATE tarefas set hora = @hora WHERE id = @id";
+                using (MySqlCommand command = new MySqlCommand(updateHora, MysqlConexaoBanco))
+                {
+                    command.Parameters.AddWithValue("@hora", Hora);
+                    command.Parameters.AddWithValue("@id", Id);
+                    int rowsAffected = command.ExecuteNonQuery();
+
+                    if (rowsAffected > 0)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Nenhum registro encontrado para atualizar.");
+                        return false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro no banco de dados - método atualizarHora " + ex.Message);
                 return false;
             }
         }
