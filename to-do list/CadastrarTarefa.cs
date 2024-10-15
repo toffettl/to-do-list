@@ -70,7 +70,7 @@ namespace to_do_list
                 MySqlConnection MysqlConexaoBanco = new MySqlConnection(ConexaoBanco.bancoServidor);
                 MysqlConexaoBanco.Open();
 
-                string select = $"select id, nome , completa from tarefas where id = '{numeroTarefas}';";
+                string select = $"select id, nome , completa, hora from tarefas where id = '{numeroTarefas}';";
 
                 MySqlCommand comandoSql = MysqlConexaoBanco.CreateCommand();
                 comandoSql.CommandText = select;

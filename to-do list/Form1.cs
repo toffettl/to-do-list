@@ -38,6 +38,7 @@ namespace to_do_list
                 {
                     string idTarefa = reader["id"].ToString();
                     string nomeTarefa = reader["nome"].ToString();
+                    string horaStatus = reader["hora"].ToString();
                     int statusTarefa = Convert.ToInt32(reader["completa"]);
                     Color corStatus;
                     Color corStatusTxt;
@@ -51,11 +52,11 @@ namespace to_do_list
                         corStatus = ColorTranslator.FromHtml("#F5D0CD");
                         corStatusTxt = ColorTranslator.FromHtml("#d63a2f");
                     }
-                    criarPanel(Convert.ToInt32(idTarefa), nomeTarefa, Convert.ToInt32(statusTarefa), corStatus, corStatusTxt);
+                    criarPanel(Convert.ToInt32(idTarefa), nomeTarefa, Convert.ToInt32(statusTarefa), corStatus, corStatusTxt, horaStatus);
                 }
             }
         }
-        public void criarPanel(int idTarefa, string nomeTarefa, int statusTarefa, Color corStatus, Color corStatusTxt)
+        public void criarPanel(int idTarefa, string nomeTarefa, int statusTarefa, Color corStatus, Color corStatusTxt, string horaStatus)
         {
             CadastrarTarefa cadTarefas = new CadastrarTarefa();
             Panel painel = new Panel()
@@ -101,8 +102,12 @@ namespace to_do_list
                 ShowUpDown = true,
                 Size = new Size(55, 10),
                 Font = new Font("Arial", 10, FontStyle.Bold),
-                Tag = idTarefa
+                Tag = idTarefa,
             };
+            if (DateTime.TryParse(horaStatus, out DateTime parsedTime))
+            {
+                boxHoras.Value = parsedTime; // Atribuindo o valor ao DateTimePicker
+            }
 
             btnExcluir.Click += (s, args) => flowLayoutPanel2.Controls.Remove(painel);
             btnExcluir.Click += BtnExcluir_Click;
@@ -192,7 +197,8 @@ namespace to_do_list
                 cadTarefas.Hora = hora;
                 if (cadTarefas.atualizarHora())
                 {
-                    MessageBox.Show("das");
+                    pictureBox1.Visible = true;
+                    timer1.Start();
                 }
             }
         }
@@ -204,8 +210,9 @@ namespace to_do_list
                 int statusTarefa = 0;
                 Color corStatus = ColorTranslator.FromHtml("#F5D0CD");
                 Color corStatusTxt = ColorTranslator.FromHtml("#d63a2f");
+                string dataStatus = "0000-00-00";
                 int tarefaId = cadTarefa.cadastrarTarefa();
-                criarPanel(tarefaId, cadTarefa.Nome, statusTarefa, corStatus, corStatusTxt);
+                criarPanel(tarefaId, cadTarefa.Nome, statusTarefa, corStatus, corStatusTxt, dataStatus);
                 if (tarefaId > 0)
                 {
                     MessageBox.Show($"Tarefa adicionada com sucesso!");
